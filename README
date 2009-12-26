@@ -3,13 +3,24 @@ MbMail
 
 MbMail is a rails-plugin for handling mails for mobile-phone in Japan.
 
-* features
+* features..
   * DMail
     * converting deco-mail(text/html mail for mobile-phone) between
       each formats (NTT DoCoMo, Au, and SoftBank).
   * MbMailer
-    * switching default charset to 'iso-2022-jp'
-    * accepting 'triple-dotted address (ex. test...@example.com)'
+    * extended from ActionMailer for handling mails for mobile-phone in Japan.
+    * accepting 'triple-dotted address (ex. test...@example.com)'.
+    * sending/receiving email including emoticon(emoji).
+
+* using with..
+  * Jpmobile
+    * importing emoticon(emoji) conversion tables from Jpmobile.
+    * added conversion tables:
+      * Au: Unicode <=> Shift-JIS code for JIS mail
+      * SoftBank: Unicode <=> Shift-JIS
+  * TMail
+    * modified mail-header parser to accept 'triple-dotted address'.
+    * modified Unquoter and removed decoding process from Decoder.
 
 Example
 =======

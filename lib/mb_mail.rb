@@ -1,4 +1,5 @@
 require 'rubygems'
+require 'action_mailer'
 require 'nkf'
 require 'scanf'
 

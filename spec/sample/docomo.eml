@@ -1,0 +1,13 @@
+Delivered-To: example@example.com
+Date: Fri, 25 Dec 2009 02:05:11 +0900 (JST)
+From: example@docomo.ne.jp
+To: example@example.com
+Subject: =?shift_jis?B?+J8gkLCC6g==?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset="Shift_JIS"
+Content-Transfer-Encoding: 8bit
+
+this is a template of sample mail.
+本文に絵文字を含む事もできます。
+絵文字はUnicode数値参照で記述します。
+ 晴れ絵文字です

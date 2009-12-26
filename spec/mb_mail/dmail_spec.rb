@@ -9,6 +9,10 @@ describe MbMail::DMail, "は" do
     @d = MbMail::DMail.load("#{SAMPLE_DIR}/decomail.eml")
     @d.should satisfy { |d| d.instance_of? MbMail::DMail }
   end
+  it "既存のテキストメールを元に正しく初期化できる" do
+    @d = MbMail::DMail.load("#{SAMPLE_DIR}/docomo.eml")
+    @d.should satisfy { |d| d.instance_of? MbMail::DMail }
+  end
   describe "構築済みの HTML メールを" do
     before do
       @dm = MbMail::DMail.new
@@ -45,7 +49,7 @@ describe MbMail::DMail, "は" do
       ## 本文 text/plain パート
       @text_part = MbMail::DMail.new
       @text_part.transfer_encoding = 'Base64'
-      ### 絵文字変換を使うのであれば Unicode 実体参照に変換しておく
+      ### 絵文字変換を使うのであれば Unicode 参照に変換しておく
       @text_part.content_type = 'text/plain; charset="UTF-8"'
       @text_part.body = Base64.encode64(Jpmobile::Emoticon.utf8_to_unicodecr("日本語メールです。\n絵文字を使用する場合はdocomoのUnicode表記を使用します。\n&#xE63E;これは「晴れ」"))
       ## 本文 text/html パート
@@ -68,6 +72,20 @@ describe MbMail::DMail, "は" do
       @inlined_image_parts.each { |ip| @rel_part.parts << ip }
       @dm.parts << @rel_part
       @attached_image_parts.each { |ap| @dm.parts << ap }
+    end
+    it "docomo 向けに変換できる" do
+      lambda { @dm.to_docomo_format }.should_not raise_error
+    end
+    it "au 向けに変換できる" do
+      lambda { @dm.to_au_format }.should_not raise_error
+    end
+    it "softbank 向けに変換できる" do
+      lambda { @dm.to_softbank_format }.should_not raise_error
+    end
+  end
+  describe "既存のテキストメールを(デコメールと同様に扱い)、" do
+    before do
+      @dm = MbMail::DMail.load("#{SAMPLE_DIR}/docomo.eml")
     end
     it "docomo 向けに変換できる" do
       lambda { @dm.to_docomo_format }.should_not raise_error

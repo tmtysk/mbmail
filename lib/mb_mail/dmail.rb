@@ -116,22 +116,26 @@ module MbMail
       end
 
       # text/html パートの作成
-      hp = MbMail::DMail.new
-      case carrier
-      when :docomo
-        hp.content_type = 'text/html; charset="Shift_JIS"'
-        hp.transfer_encoding = 'Base64'
-        hp.body = Base64.encode64(Jpmobile::Emoticon::unicodecr_to_external(NKF.nkf('-m0 -x -Ws', @html_part.body), Jpmobile::Emoticon::CONVERSION_TABLE_TO_DOCOMO))
-      when :au
-        hp.content_type = 'text/html; charset="Shift_JIS"'
-        hp.transfer_encoding = 'Base64'
-        hp.body = Base64.encode64(Jpmobile::Emoticon::unicodecr_to_external(NKF.nkf('-m0 -x -Ws', @html_part.body), Jpmobile::Emoticon::CONVERSION_TABLE_TO_AU))
-      when :softbank
-        hp.content_type = 'text/html; charset="UTF-8"'
-        hp.transfer_encoding = 'Base64'
-        table = Jpmobile::Emoticon::CONVERSION_TABLE_TO_SOFTBANK
-        emoticon_converted = @html_part.body.gsub(/&#x([0-9a-f]{4});/i) do |match|
-          unicode = $1.scanf("%x").first
+      if @html_part.nil? then
+        # テキストのみのメール / thanks to ode.
+        hp = nil
+      else
+        hp = MbMail::DMail.new
+        case carrier
+        when :docomo
+          hp.content_type = 'text/html; charset="Shift_JIS"'
+          hp.transfer_encoding = 'Base64'
+          hp.body = Base64.encode64(Jpmobile::Emoticon::unicodecr_to_external(NKF.nkf('-m0 -x -Ws', @html_part.body), Jpmobile::Emoticon::CONVERSION_TABLE_TO_DOCOMO))
+        when :au
+          hp.content_type = 'text/html; charset="Shift_JIS"'
+          hp.transfer_encoding = 'Base64'
+          hp.body = Base64.encode64(Jpmobile::Emoticon::unicodecr_to_external(NKF.nkf('-m0 -x -Ws', @html_part.body), Jpmobile::Emoticon::CONVERSION_TABLE_TO_AU))
+        when :softbank
+          hp.content_type = 'text/html; charset="UTF-8"'
+          hp.transfer_encoding = 'Base64'
+          table = Jpmobile::Emoticon::CONVERSION_TABLE_TO_SOFTBANK
+          emoticon_converted = @html_part.body.gsub(/&#x([0-9a-f]{4});/i) do |match|
+            unicode = $1.scanf("%x").first
           case table[unicode]
           when Integer
             [(table[unicode].to_i-0x1000)].pack('U')
@@ -140,12 +144,13 @@ module MbMail
           else
             match
           end
+          end
+          hp.body = Base64.encode64(emoticon_converted)
+        else
+          hp.content_type = 'text/plain; charset="UTF-8"'
+          hp.transfer_encoding = 'Base64'
+          hp.body = Base64.encode64(@html_part.body)
         end
-        hp.body = Base64.encode64(emoticon_converted)
-      else
-        hp.content_type = 'text/plain; charset="UTF-8"'
-        hp.transfer_encoding = 'Base64'
-        hp.body = Base64.encode64(@html_part.body)
       end
 
       # キャリアによって multipart 構成を分岐
@@ -153,7 +158,9 @@ module MbMail
       alt_p.body = ""
       alt_p.content_type = 'multipart/alternative'
       alt_p.parts << tp
-      alt_p.parts << hp
+      if hp then
+        alt_p.parts << hp
+      end
       case carrier
       when :au
         dm.parts << alt_p

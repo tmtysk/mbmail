@@ -10,11 +10,20 @@ module Jpmobile
       end
     end
 
-    # +str+ のなかでDoCoMo絵文字をUnicode数値文字参照に置換した文字列を返す。
+    # +str+ のなかでAuのSJIS絵文字をUnicode数値文字参照に置換した文字列を返す。
     def self.external_to_unicodecr_au(str)
       str.gsub(AU_SJIS_REGEXP) do |match|
         sjis = match.unpack('n').first
         unicode = AU_SJIS_TO_UNICODE[sjis]
+        unicode ? ("&#x%04x;"%unicode) : match
+      end
+    end
+
+    # +str+ のなかでAuのJIS埋め込み用SJIS絵文字をUnicode数値文字参照に置換した文字列を返す。
+    def self.external_to_unicodecr_au_mail(str)
+      str.gsub(AU_MAIL_SJIS_REGEXP) do |match|
+        sjis = match.unpack('n').first
+        unicode = AU_MAIL_SJIS_TO_UNICODE[sjis]
         unicode ? ("&#x%04x;"%unicode) : match
       end
     end
@@ -27,9 +36,20 @@ module Jpmobile
         "&#x%04x;" % (unicode+0x1000)
       end
     end
+
+    # +str+のなかでSJISのSoftBank絵文字を(+0x1000だけシフトして)Unicode数値文字参照に変換した文字列を返す。
+    def self.external_sjis_to_unicodecr_softbank(str)
+      str.gsub(SOFTBANK_SJIS_REGEXP) do |match|
+        sjis = match.unpack('n').first
+        unicode = SOFTBANK_SJIS_TO_UNICODE[sjis]
+        unicode ? ("&#x%04x;" % (unicode+0x1000)) : match
+      end
+    end
+
     def self.external_to_unicodecr_vodafone(str)
       external_to_unicodecr_softbank(str)
     end
+
     # +str+のなかでWebcodeのSoftBank絵文字を(+0x1000だけシフトして)Unicode数値文字参照に変換した文字列を返す。
     def self.external_to_unicodecr_jphone(str)
       # SoftBank Webcode
